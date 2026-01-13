@@ -6,30 +6,34 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
-  const Navigate = useNavigate();
 
-  function check() {
-    if (email.trim() === "" || password.trim() === "") {
+  const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  const check = async () => {
+    if (!email.trim() || !password.trim()) {
       setErr("Email and Password are required!");
       return;
     }
 
     setErr("");
 
-    axios
-      .post("https://netflixbackend-82oq.onrender.com/login", {
+    try {
+      const res = await axios.post(`${API_URL}/login`, {
         username: email,
         password: password,
-      })
-      .then((res) => {
-        if (res.data === true) {
-          Navigate("/success");
-        } else {
-          Navigate("/fail");
-        }
-      })
-      .catch((err) => console.error("Error:", err));
-  }
+      });
+
+      if (res.data.success === true) {
+        navigate("/success");
+      } else {
+        navigate("/fail");
+      }
+    } catch (error) {
+      console.error(error);
+      setErr("Server error. Please try again later.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black lg:bg-[url('/bg.jpg')] bg-cover bg-center relative">
@@ -46,12 +50,15 @@ const Login = () => {
           <input
             type="email"
             placeholder="Email"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full p-3 rounded-md bg-transparent border border-white focus:outline-none mb-4"
           />
+
           <input
             type="password"
             placeholder="Password"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full p-3 rounded-md bg-transparent border border-white focus:outline-none mb-4"
           />
@@ -71,7 +78,9 @@ const Login = () => {
             Use Sign-in Code
           </button>
 
-          <p className="text-center underline mt-3">Forgot Password?</p>
+          <p className="text-center underline mt-3 cursor-pointer">
+            Forgot Password?
+          </p>
 
           <div className="flex items-center mt-4">
             <input type="checkbox" className="mr-2" />
@@ -80,12 +89,11 @@ const Login = () => {
 
           <p className="mt-3">
             New to Netflix?
-            <span className="underline ml-1">Sign up now</span>
+            <span className="underline ml-1 cursor-pointer">Sign up now</span>
           </p>
 
           <p className="text-xs mt-2">
-            This page is protected by Google reCAPTCHA to ensure you're not a
-            bot.{" "}
+            This page is protected by Google reCAPTCHA to ensure you're not a bot.{" "}
             <span className="text-blue-400 underline cursor-pointer">
               Learn more.
             </span>
